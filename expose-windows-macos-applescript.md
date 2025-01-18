@@ -60,6 +60,7 @@ on collectWindows()
 		set appProcesses to application processes
 		set collectedWindows to {}
 		repeat with appProcess in appProcesses
+			delay 1.0E-3
 			tell appProcess
 				if visible is true then
 					set appName to name
