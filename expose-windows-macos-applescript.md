@@ -64,8 +64,6 @@ on collectWindows()
 				if visible is true then
 					set appName to name
 					try
-						
-						-- Handle other applications using System Events
 						repeat with win in windows
 							set winBounds to {position of win, size of win}
 							set xCoord to item 1 of item 1 of winBounds
@@ -73,29 +71,22 @@ on collectWindows()
 							
 							-- Prepare the window entry
 							set newWindow to {win, xCoord, widthHeight, appName}
-							try
-								set inserted to false
-								repeat with i from 1 to count of collectedWindows
-									if xCoord < item 2 of item i of collectedWindows then
-										set collectedWindows to (items 1 thru (i - 1) of collectedWindows) & {newWindow} & (items i thru -1 of collectedWindows)
-										set inserted to true
-										exit repeat
-									end if
-								end repeat
-								-- If not inserted, append to the end
-								if not inserted then
-									set end of collectedWindows to newWindow
+							set inserted to false
+							repeat with i from 1 to count of collectedWindows
+								if xCoord < item 2 of item i of collectedWindows then
+									set collectedWindows to (items 1 thru (i - 1) of collectedWindows) & {newWindow} & (items i thru -1 of collectedWindows)
+									set inserted to true
+									exit repeat
 								end if
-								
-								-- set end of collectedWindows to {win, xCoord, widthHeight, appName}
-							on error
-								--set end of collectedWindows to newWindow
-							end try
+							end repeat
+							-- 									-- If not inserted, append to the end
+							if not inserted then
+								set end of collectedWindows to newWindow
+							end if
 						end repeat
-					on error
-						-- Skip inaccessible windows and notify
-						display dialog "Encountered an inaccessible window. Retrying..."
-						return {} -- Return empty list to signal error and retry
+					on error errMsg number errNum
+						-- Log the error for debugging
+						log "Error with " & appName & ": " & errMsg
 					end try
 				end if
 			end tell
