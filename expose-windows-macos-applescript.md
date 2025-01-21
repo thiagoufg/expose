@@ -146,7 +146,11 @@ func arrangeWindowsSideBySide() {
     let windowCount = windows.count
     // Calculate target width based on window count
     let targetWidth: CGFloat
-    if windowCount <= 2 {
+    // Store initial width of 3rd window if it exists
+    let thirdWindowInitialWidth = windowCount >= 3 ? windows[2].widthHeight.width : 0
+    if windowCount == 5 && (windows[2].widthHeight.width == screenWidth / 5) {
+        targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
+    } else if windowCount <= 2 {
         targetWidth = screenWidth / 3
     } else {
         targetWidth = screenWidth / CGFloat(windowCount)
@@ -174,26 +178,47 @@ func arrangeWindowsSideBySide() {
                 AXValueGetValue(sizeValue as! AXValue, .cgSize, &currentSize)
             }
             
-            // Calculate target position based on window count
+            // Calculate target position and size based on window count and index
             let finalX: CGFloat
-            if windowCount == 1 {
-                finalX = screenWidth / 3
-            } else if windowCount == 2 {
-                if index == 0 {
-                    finalX = (screenWidth / 2) - targetWidth
+            let finalWidth: CGFloat
+            
+            if windowCount == 5 && thirdWindowInitialWidth == (screenWidth / 5) {
+                if index < 2 {
+                    // First two windows
+                    finalX = targetWidth * CGFloat(index)
+                    finalWidth = targetWidth
+                } else if index == 2 {
+                    // Middle window (double width)
+                    finalX = targetWidth * CGFloat(index)
+                    finalWidth = targetWidth * 2
                 } else {
-                    finalX = screenWidth / 2
+                    // Last two windows
+                    finalX = targetWidth * CGFloat(index + 1)
+                    finalWidth = targetWidth
                 }
             } else {
-                finalX = targetWidth * CGFloat(index)
+                // Original behavior for other window counts
+                if windowCount == 1 {
+                    finalX = screenWidth / 3
+                } else if windowCount == 2 {
+                    if index == 0 {
+                        finalX = (screenWidth / 2) - targetWidth
+                    } else {
+                        finalX = screenWidth / 2
+                    }
+                } else {
+                    finalX = targetWidth * CGFloat(index)
+                }
+                finalWidth = targetWidth
             }
+            
             let finalY = screenHeight - targetHeight
             
             // Interpolate between current and final positions/sizes
             let progress = CGFloat(step) / CGFloat(n)
             let newX = currentPosition.x + (finalX - currentPosition.x) * progress
             let newY = currentPosition.y + (finalY - currentPosition.y) * progress
-            let newWidth = currentSize.width + (targetWidth - currentSize.width) * progress
+            let newWidth = currentSize.width + (finalWidth - currentSize.width) * progress
             let newHeight = currentSize.height + (targetHeight - currentSize.height) * progress
             
             // Create position and size values
@@ -219,4 +244,5 @@ func arrangeWindowsSideBySide() {
 
 // Replace the CSV output with window arrangement
 arrangeWindowsSideBySide()
+
 ```
