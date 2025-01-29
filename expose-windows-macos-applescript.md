@@ -103,8 +103,15 @@ func collectWindows() -> [(window: AXUIElement, xCoord: CGFloat, widthHeight: NS
                     AXValueGetValue(sizeValue as! AXValue, .cgSize, &size)
                 }
                 
-                // Skip Finder windows at (0,0)
-                if appName == "Finder" && position.x == 0 && position.y == 0 {
+                // Get minimized state
+                var minimizedValue: AnyObject?
+                AXUIElementCopyAttributeValue(window, kAXMinimizedAttribute as CFString, &minimizedValue)
+                let isMinimized = (minimizedValue as? NSNumber)?.boolValue ?? false
+                
+                // Skip Finder windows at (0,0), Zoom windows, and minimized windows
+                if (appName == "Finder" && position.x == 0 && position.y == 0) ||
+                   appName == "zoom.us" ||
+                   isMinimized {
                     continue
                 }
                 
