@@ -56,6 +56,8 @@ let screenHeight = NSScreen.main?.frame.size.height ?? 0
 // Initialize array for windows
 var allWindows: [(win: NSWindow, xCoord: CGFloat, widthHeight: NSSize, appName: String)] = []
 
+let alternateCenterWindowSizeWhen5Windows = false
+let isLargerCenterWhenNotAlternating = true
 // Function to get app windows
 func getAppWindows(bundleIdentifier: String) -> [AXUIElement] {
     guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first else {
@@ -155,7 +157,7 @@ func arrangeWindowsSideBySide() {
     let targetWidth: CGFloat
     // Store initial width of 3rd window if it exists
     let thirdWindowInitialWidth = windowCount >= 3 ? windows[2].widthHeight.width : 0
-    if windowCount == 5 && (windows[2].widthHeight.width == screenWidth / 5) {
+    if  windowCount == 5 && (alternateCenterWindowSizeWhen5Windows ? windows[2].widthHeight.width == screenWidth / 5 : isLargerCenterWhenNotAlternating) {
         targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
     } else if windowCount <= 2 {
         targetWidth = screenWidth / 3
@@ -165,7 +167,7 @@ func arrangeWindowsSideBySide() {
     let targetHeight = screenHeight
     
     // Animation parameters
-    let n: Int = 10  // Number of animation steps
+    let n: Int = 1  // Number of animation steps
     
     for step in 1...n {
         for (index, windowDetails) in windows.enumerated() {
@@ -189,7 +191,7 @@ func arrangeWindowsSideBySide() {
             let finalX: CGFloat
             let finalWidth: CGFloat
             
-            if windowCount == 5 && thirdWindowInitialWidth == (screenWidth / 5) {
+            if  windowCount == 5 && (alternateCenterWindowSizeWhen5Windows ? thirdWindowInitialWidth == (screenWidth / 5) : isLargerCenterWhenNotAlternating) {
                 if index < 2 {
                     // First two windows
                     finalX = targetWidth * CGFloat(index)
@@ -245,11 +247,12 @@ func arrangeWindowsSideBySide() {
         }
         
         // Add a small delay between steps
-        Thread.sleep(forTimeInterval: 0.02)
+        //Thread.sleep(forTimeInterval: 0.02)
     }
 }
 
 // Replace the CSV output with window arrangement
 arrangeWindowsSideBySide()
+
 
 ```
