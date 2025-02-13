@@ -56,7 +56,7 @@ let screenHeight = NSScreen.main?.frame.size.height ?? 0
 // Initialize array for windows
 var allWindows: [(win: NSWindow, xCoord: CGFloat, widthHeight: NSSize, appName: String)] = []
 
-let alternateCenterWindowSizeWhen5Windows = false
+let alternateCenterWindowsWhen5or4Windows = true
 let isLargerCenterWhenNotAlternating = true
 // Function to get app windows
 func getAppWindows(bundleIdentifier: String) -> [AXUIElement] {
@@ -157,7 +157,9 @@ func arrangeWindowsSideBySide() {
     let targetWidth: CGFloat
     // Store initial width of 3rd window if it exists
     let thirdWindowInitialWidth = windowCount >= 3 ? windows[2].widthHeight.width : 0
-    if  windowCount == 5 && (alternateCenterWindowSizeWhen5Windows ? windows[2].widthHeight.width == screenWidth / 5 : isLargerCenterWhenNotAlternating) {
+    if  windowCount == 5 && (alternateCenterWindowsWhen5or4Windows ? windows[2].widthHeight.width == screenWidth / 5 : isLargerCenterWhenNotAlternating) {
+        targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
+    } else if  windowCount == 4 && (alternateCenterWindowsWhen5or4Windows ? windows[1].widthHeight.width == screenWidth / 4 : isLargerCenterWhenNotAlternating) {
         targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
     } else if windowCount <= 2 {
         targetWidth = screenWidth / 3
@@ -167,7 +169,8 @@ func arrangeWindowsSideBySide() {
     let targetHeight = screenHeight
     
     // Animation parameters
-    let n: Int = 1  // Number of animation steps
+    let n: Int = 10  // Number of animation steps
+    var hasAnyWindowMoved = false
     
     for step in 1...n {
         for (index, windowDetails) in windows.enumerated() {
@@ -191,7 +194,7 @@ func arrangeWindowsSideBySide() {
             let finalX: CGFloat
             let finalWidth: CGFloat
             
-            if  windowCount == 5 && (alternateCenterWindowSizeWhen5Windows ? thirdWindowInitialWidth == (screenWidth / 5) : isLargerCenterWhenNotAlternating) {
+            if  windowCount == 5 && (alternateCenterWindowsWhen5or4Windows ? thirdWindowInitialWidth == (screenWidth / 5) : isLargerCenterWhenNotAlternating) {
                 if index < 2 {
                     // First two windows
                     finalX = targetWidth * CGFloat(index)
@@ -203,6 +206,24 @@ func arrangeWindowsSideBySide() {
                 } else {
                     // Last two windows
                     finalX = targetWidth * CGFloat(index + 1)
+                    finalWidth = targetWidth
+                }
+            } else if  windowCount == 4 && (alternateCenterWindowsWhen5or4Windows ? thirdWindowInitialWidth == (screenWidth / 4) : isLargerCenterWhenNotAlternating) {
+                if index < 1 {
+                    // First window
+                    finalX = targetWidth * CGFloat(index)
+                    finalWidth = targetWidth
+                } else if index == 1 {
+                    // Middle window (double width)
+                    finalX = targetWidth * CGFloat(index)
+                    finalWidth = targetWidth * 2
+                } else if index == 2 {
+                    // Middle window (double width)
+                    finalX = targetWidth * CGFloat(index + 1)
+                    finalWidth = targetWidth * 2
+                } else {
+                    // Last two windows
+                    finalX = targetWidth * CGFloat(index + 2)
                     finalWidth = targetWidth
                 }
             } else {
@@ -223,6 +244,14 @@ func arrangeWindowsSideBySide() {
             
             let finalY = screenHeight - targetHeight
             
+            // Check if this window is actually moving
+            if abs(currentPosition.x - finalX) > 1 ||
+               abs(currentPosition.y - finalY) > 1 ||
+               abs(currentSize.width - finalWidth) > 1 ||
+               abs(currentSize.height - targetHeight) > 1 {
+                hasAnyWindowMoved = true
+            }
+
             // Interpolate between current and final positions/sizes
             let progress = CGFloat(step) / CGFloat(n)
             let newX = currentPosition.x + (finalX - currentPosition.x) * progress
@@ -245,9 +274,12 @@ func arrangeWindowsSideBySide() {
             AXUIElementSetAttributeValue(windowDetails.window, kAXPositionAttribute as CFString, axPositionRef)
             AXUIElementSetAttributeValue(windowDetails.window, kAXSizeAttribute as CFString, axSizeRef)
         }
-        
-        // Add a small delay between steps
-        //Thread.sleep(forTimeInterval: 0.02)
+    }
+    
+    if !hasAnyWindowMoved {
+        let alert = NSAlert()
+        alert.messageText = "hi"
+        alert.runModal()
     }
 }
 
