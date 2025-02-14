@@ -56,8 +56,8 @@ let screenHeight = NSScreen.main?.frame.size.height ?? 0
 // Initialize array for windows
 var allWindows: [(win: NSWindow, xCoord: CGFloat, widthHeight: NSSize, appName: String)] = []
 
-let alternateCenterWindowsWhen5or4Windows = true
-let isLargerCenterWhenNotAlternating = true
+let alternateCenterWindowSize = true
+let isLargerCenterPreferred = true
 // Function to get app windows
 func getAppWindows(bundleIdentifier: String) -> [AXUIElement] {
     guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first else {
@@ -153,13 +153,11 @@ func arrangeWindowsSideBySide() {
     }
     
     let windowCount = windows.count
-    // Calculate target width based on window count
     let targetWidth: CGFloat
     // Store initial width of 3rd window if it exists
-    let thirdWindowInitialWidth = windowCount >= 3 ? windows[2].widthHeight.width : 0
-    if  windowCount == 5 && (alternateCenterWindowsWhen5or4Windows ? windows[2].widthHeight.width == screenWidth / 5 : isLargerCenterWhenNotAlternating) {
-        targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
-    } else if  windowCount == 4 && (alternateCenterWindowsWhen5or4Windows ? windows[1].widthHeight.width == screenWidth / 4 : isLargerCenterWhenNotAlternating) {
+    let centerWindowInitialWidth = windowCount > 0 ? windows[Int(floor(Double(windowCount)/2))].widthHeight.width : 0
+    if (windowCount == 3 || windowCount == 4 || windowCount == 5) && 
+       (alternateCenterWindowSize ? abs(centerWindowInitialWidth - screenWidth / CGFloat(windowCount)) < 1.0 : isLargerCenterPreferred) {
         targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
     } else if windowCount <= 2 {
         targetWidth = screenWidth / 3
@@ -169,7 +167,7 @@ func arrangeWindowsSideBySide() {
     let targetHeight = screenHeight
     
     // Animation parameters
-    let n: Int = 10  // Number of animation steps
+    let n: Int = 60  // Number of animation steps
     var hasAnyWindowMoved = false
     
     for step in 1...n {
@@ -194,36 +192,40 @@ func arrangeWindowsSideBySide() {
             let finalX: CGFloat
             let finalWidth: CGFloat
             
-            if  windowCount == 5 && (alternateCenterWindowsWhen5or4Windows ? thirdWindowInitialWidth == (screenWidth / 5) : isLargerCenterWhenNotAlternating) {
+            if  windowCount == 5 && (alternateCenterWindowSize ? centerWindowInitialWidth == (screenWidth / CGFloat(windowCount)) : isLargerCenterPreferred) {
                 if index < 2 {
-                    // First two windows
                     finalX = targetWidth * CGFloat(index)
                     finalWidth = targetWidth
                 } else if index == 2 {
-                    // Middle window (double width)
                     finalX = targetWidth * CGFloat(index)
                     finalWidth = targetWidth * 2
                 } else {
-                    // Last two windows
                     finalX = targetWidth * CGFloat(index + 1)
                     finalWidth = targetWidth
                 }
-            } else if  windowCount == 4 && (alternateCenterWindowsWhen5or4Windows ? thirdWindowInitialWidth == (screenWidth / 4) : isLargerCenterWhenNotAlternating) {
-                if index < 1 {
-                    // First window
-                    finalX = targetWidth * CGFloat(index)
+            } else if  windowCount == 4 && (alternateCenterWindowSize ? centerWindowInitialWidth == (screenWidth / CGFloat(windowCount)) : isLargerCenterPreferred) {
+                if index == 0 {
+                    finalX = targetWidth * 0
                     finalWidth = targetWidth
                 } else if index == 1 {
-                    // Middle window (double width)
-                    finalX = targetWidth * CGFloat(index)
+                    finalX = targetWidth * 1
                     finalWidth = targetWidth * 2
                 } else if index == 2 {
-                    // Middle window (double width)
                     finalX = targetWidth * CGFloat(index + 1)
                     finalWidth = targetWidth * 2
                 } else {
-                    // Last two windows
                     finalX = targetWidth * CGFloat(index + 2)
+                    finalWidth = targetWidth
+                }
+            } else if  windowCount == 3 && (alternateCenterWindowSize ? abs(centerWindowInitialWidth - (screenWidth / CGFloat(windowCount))) < 1.0 : isLargerCenterPreferred) {
+                if index == 0 {
+                    finalX = targetWidth * 0
+                    finalWidth = targetWidth
+                } else if index == 1 {
+                    finalX = targetWidth * CGFloat(index)
+                    finalWidth = targetWidth * 4
+                } else {
+                    finalX = targetWidth * 5
                     finalWidth = targetWidth
                 }
             } else {
@@ -285,6 +287,5 @@ func arrangeWindowsSideBySide() {
 
 // Replace the CSV output with window arrangement
 arrangeWindowsSideBySide()
-
 
 ```
