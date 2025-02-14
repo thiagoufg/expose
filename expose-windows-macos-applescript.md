@@ -156,9 +156,12 @@ func arrangeWindowsSideBySide() {
     let targetWidth: CGFloat
     // Store initial width of 3rd window if it exists
     let centerWindowInitialWidth = windowCount > 0 ? windows[Int(floor(Double(windowCount)/2))].widthHeight.width : 0
-    if (windowCount == 3 || windowCount == 4 || windowCount == 5) && 
+    if (windowCount == 4 || windowCount == 5) && 
        (alternateCenterWindowSize ? abs(centerWindowInitialWidth - screenWidth / CGFloat(windowCount)) < 1.0 : isLargerCenterPreferred) {
-        targetWidth = screenWidth / 6  // Divide by 6 to account for the double-width middle window
+        targetWidth = screenWidth / 6
+    } else if windowCount == 3 && 
+       (alternateCenterWindowSize ? abs(centerWindowInitialWidth - screenWidth / CGFloat(windowCount)) < 1.0 : isLargerCenterPreferred) {
+        targetWidth = screenWidth / 5
     } else if windowCount <= 2 {
         targetWidth = screenWidth / 3
     } else {
@@ -223,9 +226,9 @@ func arrangeWindowsSideBySide() {
                     finalWidth = targetWidth
                 } else if index == 1 {
                     finalX = targetWidth * CGFloat(index)
-                    finalWidth = targetWidth * 4
+                    finalWidth = targetWidth * 3
                 } else {
-                    finalX = targetWidth * 5
+                    finalX = targetWidth * 4
                     finalWidth = targetWidth
                 }
             } else {
