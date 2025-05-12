@@ -172,7 +172,7 @@ func arrangeWindowsSideBySide() {
     let targetHeight = screenHeight
     
     // Animation parameters
-    let n: Int = 60  // Number of animation steps
+    let n: Int = 10  // Number of animation steps
     var hasAnyWindowMoved = false
     
     for step in 1...n {
