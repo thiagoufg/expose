@@ -1,8 +1,9 @@
 # Exposé for MacOS
 
 Step 1: Create the Swift Script  
-1. Open a code editor and type the script below.  
-2. Save it as `expose.swift` and run it with:  
+1. Open a code editor and type the script that you can find at the end of this page.  
+2. Save it in your `Documents` folder as `expose.swift`
+3. (Optional) If you want to test this script, run it with the command bellow (but you don't need to do this right now):  
    ```bash
    swift expose.swift
    ```
