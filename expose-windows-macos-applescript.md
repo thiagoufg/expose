@@ -5,6 +5,7 @@ Step 1: Create the script
 2. Save it in your `Documents` folder as `expose.swift`
 3. (Optional) If you want to test this script, run it with the command bellow (but you don't need to do this right now):  
    ```bash
+   cd ~/Documents
    swift expose.swift
    ```
 
