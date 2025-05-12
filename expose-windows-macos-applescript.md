@@ -23,7 +23,7 @@ Step 2: Create an Automator Application
    ```
 5. Save as an app.  
 6. Move the app to the Applications folder.  
-7. Open it and allow necessary permissions.  
+7. Right-click on it, choose Open, and allow necessary permissions.  
 
 Step 3: Update Security and Privacy Settings  
 1. Go to **Settings > Security > Accessibility**:  
